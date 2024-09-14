@@ -1,8 +1,11 @@
 package com.cwz;
 
+import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.functions.*;
+import static  org.apache.spark.sql.functions.col;
 
 public class HandlingCorruptData {
 
@@ -36,8 +39,14 @@ public class HandlingCorruptData {
                                 .read()
                 .option("header","true")
                                  .option("mode","PERMISSIVE")
-                                  .option("columnNameOfCorruptRecord","Records with Issues")  //it wors only for JSON
+                                  .option("columnNameOfCorruptRecord","Records with Issues")  //it works only for JSON
                                 .csv(csvFilePath);
+
+        Dataset<Row> malformedRecords=rateCodeCSVDF.filter(
+                col("RateCode").isNull()
+        );
+
+        malformedRecords.show();
 
         rateCodeCSVDF.show();
     }
