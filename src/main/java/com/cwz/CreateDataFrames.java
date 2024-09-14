@@ -124,12 +124,54 @@ public class CreateDataFrames {
                                        .option("header","true")
 //                                        .option("inferSchema","true")
                                         .schema(yellowTaxiSchema)
+                    .option("mode","FAILFAST") //DROPMALFORMED |FAILFAST |PERMISSIVE
                                         .csv(filePath);
 
 
           yellowTaxiDF.printSchema();
             yellowTaxiDF.show(false);
 
+
+        System.out.println("--------------- Way 4 - JSON -----------------------------------");
+//        Load from Data file -- csv
+        String jsonFilePath="C:\\Spark\\DataFiles\\TaxiBases.json";
+        StructType taxiBasesSchema = DataTypes.createStructType(new StructField[]{
+                DataTypes.createStructField("License Number", DataTypes.StringType, true),
+                DataTypes.createStructField("Entity Name", DataTypes.StringType, true),
+                DataTypes.createStructField("Telephone Number", DataTypes.LongType, true),
+                DataTypes.createStructField("SHL Endorsed", DataTypes.StringType, true),
+                DataTypes.createStructField("Type of Base", DataTypes.StringType, true),
+
+                // Nested StructType for Address
+                DataTypes.createStructField("Address", DataTypes.createStructType(new StructField[]{
+                        DataTypes.createStructField("Building", DataTypes.StringType, true),
+                        DataTypes.createStructField("Street", DataTypes.StringType, true),
+                        DataTypes.createStructField("City", DataTypes.StringType, true),
+                        DataTypes.createStructField("State", DataTypes.StringType, true),
+                        DataTypes.createStructField("Postcode", DataTypes.StringType, true)
+                }), true),
+
+                // Nested StructType for GeoLocation
+                DataTypes.createStructField("GeoLocation", DataTypes.createStructType(new StructField[]{
+                        DataTypes.createStructField("Latitude", DataTypes.StringType, true),
+                        DataTypes.createStructField("Longitude", DataTypes.StringType, true),
+                        DataTypes.createStructField("Location", DataTypes.StringType, true)
+                }), true)
+        });
+
+
+//        System.out.println(yellowTaxiSchema.prettyJson());
+
+        Dataset<Row> taxiBasesDF=spark
+                .read()
+                .option("multiline","true")
+                .schema(taxiBasesSchema)
+                .json(jsonFilePath);
+
+
+
+        taxiBasesDF.printSchema();
+        taxiBasesDF.show(false);
 
 
 
