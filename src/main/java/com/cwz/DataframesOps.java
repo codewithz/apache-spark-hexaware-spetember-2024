@@ -67,37 +67,37 @@ public class DataframesOps {
         Dataset<Row> yellowTaxiAnalyzedDF=yellowTaxiDF.describe("passenger_count","trip_distance");
         yellowTaxiAnalyzedDF.show();
 
-//        Accuracy Check in my dataset
-//        1: Filter Inaccurate Data [passenger count <0 trip_distance <=0]
-
-        System.out.println("Before Applying Filter :"+yellowTaxiDF.count());
-        yellowTaxiDF=yellowTaxiDF
-                        .where("passenger_count>0")
-                       .filter(col("trip_distance").gt(0.0));
-
-        System.out.println("After Applying Filter :"+yellowTaxiDF.count());
-
-//        Completeness Check
-//        2.a -> Drop rows with null
-//            yellowTaxiDF=yellowTaxiDF.na().drop("all");
-
-//        2.b -> Replace with Default Value
+////        Accuracy Check in my dataset
+////        1: Filter Inaccurate Data [passenger count <0 trip_distance <=0]
+//
+//        System.out.println("Before Applying Filter :"+yellowTaxiDF.count());
+//        yellowTaxiDF=yellowTaxiDF
+//                        .where("passenger_count>0")
+//                       .filter(col("trip_distance").gt(0.0));
+//
+//        System.out.println("After Applying Filter :"+yellowTaxiDF.count());
+//
+////        Completeness Check
+////        2.a -> Drop rows with null
+////            yellowTaxiDF=yellowTaxiDF.na().drop("all");
+//
+////        2.b -> Replace with Default Value
         Map<String,Object> defaultValuesMap=new HashMap<>();
         defaultValuesMap.put("payment_type",5);
         defaultValuesMap.put("RateCodeId",1);
 
-        yellowTaxiDF=yellowTaxiDF.na().fill(defaultValuesMap);
-        System.out.println("After Applying Completeness Check :"+yellowTaxiDF.count());
-
-//        3. Drop Duplicates
-
-        yellowTaxiDF=yellowTaxiDF.dropDuplicates();
-        System.out.println("After Dropping Duplicates:"+yellowTaxiDF.count());
-
-//        4.Timeliness Check -- Removing the data out of bounds
-
-        yellowTaxiDF=yellowTaxiDF.where ("lpep_pickup_datetime >= '2022-10-01'" +
-                "    AND lpep_dropoff_datetime < '2022-11-01'");
+//        yellowTaxiDF=yellowTaxiDF.na().fill(defaultValuesMap);
+//        System.out.println("After Applying Completeness Check :"+yellowTaxiDF.count());
+//
+////        3. Drop Duplicates
+//
+//        yellowTaxiDF=yellowTaxiDF.dropDuplicates();
+//        System.out.println("After Dropping Duplicates:"+yellowTaxiDF.count());
+//
+////        4.Timeliness Check -- Removing the data out of bounds
+//
+//        yellowTaxiDF=yellowTaxiDF.where ("lpep_pickup_datetime >= '2022-10-01'" +
+//                "    AND lpep_dropoff_datetime < '2022-11-01'");
 
 //        ----If applied together -----
 
@@ -124,7 +124,39 @@ public class DataframesOps {
         // Show the result after all operations
         yellowTaxiDF.show(false);
 
-        System.out.println("After Applying Timeliness Check :"+yellowTaxiDF.count());
+
+//        Selecting limited columns
+
+        yellowTaxiDF=yellowTaxiDF.select(
+                col("VendorId"),
+                col("passenger_count").cast("int"),
+                col("trip_distance").alias("TripDistance"),
+                col("lpep_pickup_datetime"),          // Select lpep_pickup_datetime
+                col("lpep_dropoff_datetime"),         // Select lpep_dropoff_datetime
+                col("PUlocationID"),                  // Select PUlocationID
+                col("DOlocationID"),                  // Select DOlocationID
+                col("RatecodeID"),                    // Select RatecodeID
+                col("total_amount"),                  // Select total_amount
+                col("payment_type")
+
+
+        );
+
+        yellowTaxiDF.printSchema();
+
+//        Renaming the columns
+
+        yellowTaxiDF=yellowTaxiDF
+                .withColumnRenamed("passenger_count","PassengerCount")
+                .withColumnRenamed("lpep_pickup_datetime", "PickupTime")
+                .withColumnRenamed("lpep_dropoff_datetime", "DropTime")
+                .withColumnRenamed("PUlocationID", "PickupLocationId")
+                .withColumnRenamed("DOlocationID", "DropLocationId")
+                .withColumnRenamed("total_amount", "TotalAmount")
+                .withColumnRenamed("payment_type", "PaymentType");
+
+        yellowTaxiDF.printSchema();
+
         try (final var scanner = new Scanner(System.in)) {
             scanner.nextLine();
         }
