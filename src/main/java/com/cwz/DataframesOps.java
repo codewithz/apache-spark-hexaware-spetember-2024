@@ -185,6 +185,11 @@ public class DataframesOps {
         Column tripTimeInMinutesExpr=round(tripTimeInSecondsExpr.divide(60),2);
 
         yellowTaxiDF=yellowTaxiDF.withColumn("TripTimeInMinutes",tripTimeInMinutesExpr);
+
+        Column tripTypeColumn=when(col("RateCodeId").equalTo(6),"SharedTrip")
+                .otherwise("SoloTrip");
+        yellowTaxiDF=yellowTaxiDF.withColumn("TripType",tripTypeColumn);
+
         yellowTaxiDF.printSchema();
 
         yellowTaxiDF.show(5);
