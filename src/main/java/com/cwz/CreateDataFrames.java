@@ -123,12 +123,12 @@ public class CreateDataFrames {
                                         .read()
                                        .option("header","true")
 //                                        .option("inferSchema","true")
-                                        .schema(schema)
+                                        .schema(yellowTaxiSchema)
                                         .csv(filePath);
 
 
           yellowTaxiDF.printSchema();
-            yellowTaxiDF.show();
+            yellowTaxiDF.show(false);
 
 
 
