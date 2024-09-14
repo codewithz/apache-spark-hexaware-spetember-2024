@@ -146,8 +146,17 @@ public class SparkRDDConcepts {
                 zoneRow -> new Tuple2<>(zoneRow[1],1)  //Key : Borough, Value :1
         );
 
+//        List<Tuple2<String, Integer>> result1 = taxiZonesPairRDD.collect();
+//        for (Tuple2<String, Integer> row : result1) {
+//            System.out.println("Borough: " + row._1 + ", Count: " + row._2);
+//        }
         // Distinct Operation - Find distinct items
         JavaPairRDD<String, Integer> distinctZonesRdd = taxiZonesPairRDD.distinct();
+
+//        List<Tuple2<String, Integer>> result2 = distinctZonesRdd.collect();
+//        for (Tuple2<String, Integer> row : result2) {
+//            System.out.println("Borough: " + row._1 + ", Count: " + row._2);
+//        }
 
         // ReduceByKey Operation - Group by Borough and calculate count
         JavaPairRDD<String, Integer> boroughCountRdd = distinctZonesRdd.reduceByKey(
