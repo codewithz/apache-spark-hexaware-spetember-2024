@@ -1,0 +1,61 @@
+package com.cwz;
+
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.StructField;
+import org.apache.spark.sql.types.StructType;
+
+public class DataframesOps {
+
+    public static void main(String[] args) {
+
+        SparkSession spark=SparkSession.builder()
+                .appName("DataFrame/Dataset Operations ")
+                .master("local[4]")
+                .getOrCreate();
+
+
+        //       Load from Data file -- csv
+        String filePath="C:\\Spark\\DataFiles\\YellowTaxis_202210.csv";
+
+        StructType yellowTaxiSchema = DataTypes.createStructType(new StructField[] {
+                DataTypes.createStructField("VendorId", DataTypes.IntegerType, true),
+                DataTypes.createStructField("lpep_pickup_datetime", DataTypes.TimestampType, true),
+                DataTypes.createStructField("lpep_dropoff_datetime", DataTypes.TimestampType, true),
+                DataTypes.createStructField("passenger_count", DataTypes.DoubleType, true),
+                DataTypes.createStructField("trip_distance", DataTypes.DoubleType, true),
+                DataTypes.createStructField("RatecodeID", DataTypes.DoubleType, true),
+                DataTypes.createStructField("store_and_fwd_flag", DataTypes.StringType, true),
+                DataTypes.createStructField("PULocationID", DataTypes.IntegerType, true),
+                DataTypes.createStructField("DOLocationID", DataTypes.IntegerType, true),
+                DataTypes.createStructField("payment_type", DataTypes.IntegerType, true),
+                DataTypes.createStructField("fare_amount", DataTypes.DoubleType, true),
+                DataTypes.createStructField("extra", DataTypes.DoubleType, true),
+                DataTypes.createStructField("mta_tax", DataTypes.DoubleType, true),
+                DataTypes.createStructField("tip_amount", DataTypes.DoubleType, true),
+                DataTypes.createStructField("tolls_amount", DataTypes.DoubleType, true),
+                DataTypes.createStructField("improvement_surcharge", DataTypes.DoubleType, true),
+                DataTypes.createStructField("total_amount", DataTypes.DoubleType, true),
+                DataTypes.createStructField("congestion_surcharge", DataTypes.DoubleType, true),
+                DataTypes.createStructField("airport_fee", DataTypes.DoubleType, true)
+        });
+
+        // Print the schema for verification
+        System.out.println(yellowTaxiSchema.prettyJson());
+
+        Dataset<Row> yellowTaxiDF=spark
+                .read()
+                .option("header","true")
+//                                        .option("inferSchema","true")
+                .schema(yellowTaxiSchema)
+                .option("mode","FAILFAST") //DROPMALFORMED |FAILFAST |PERMISSIVE
+                .csv(filePath);
+
+
+        yellowTaxiDF.printSchema();
+        yellowTaxiDF.show(false);
+
+    }
+}
