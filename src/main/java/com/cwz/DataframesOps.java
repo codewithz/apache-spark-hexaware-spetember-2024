@@ -6,6 +6,11 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
+import static  org.apache.spark.sql.functions.col;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
 
 public class DataframesOps {
 
@@ -50,12 +55,79 @@ public class DataframesOps {
                 .option("header","true")
 //                                        .option("inferSchema","true")
                 .schema(yellowTaxiSchema)
-                .option("mode","FAILFAST") //DROPMALFORMED |FAILFAST |PERMISSIVE
+//                .option("mode","FAILFAST") //DROPMALFORMED |FAILFAST |PERMISSIVE
                 .csv(filePath);
 
 
         yellowTaxiDF.printSchema();
         yellowTaxiDF.show(false);
+
+//        Get some analyzed Dataframes
+
+        Dataset<Row> yellowTaxiAnalyzedDF=yellowTaxiDF.describe("passenger_count","trip_distance");
+        yellowTaxiAnalyzedDF.show();
+
+//        Accuracy Check in my dataset
+//        1: Filter Inaccurate Data [passenger count <0 trip_distance <=0]
+
+        System.out.println("Before Applying Filter :"+yellowTaxiDF.count());
+        yellowTaxiDF=yellowTaxiDF
+                        .where("passenger_count>0")
+                       .filter(col("trip_distance").gt(0.0));
+
+        System.out.println("After Applying Filter :"+yellowTaxiDF.count());
+
+//        Completeness Check
+//        2.a -> Drop rows with null
+//            yellowTaxiDF=yellowTaxiDF.na().drop("all");
+
+//        2.b -> Replace with Default Value
+        Map<String,Object> defaultValuesMap=new HashMap<>();
+        defaultValuesMap.put("payment_type",5);
+        defaultValuesMap.put("RateCodeId",1);
+
+        yellowTaxiDF=yellowTaxiDF.na().fill(defaultValuesMap);
+        System.out.println("After Applying Completeness Check :"+yellowTaxiDF.count());
+
+//        3. Drop Duplicates
+
+        yellowTaxiDF=yellowTaxiDF.dropDuplicates();
+        System.out.println("After Dropping Duplicates:"+yellowTaxiDF.count());
+
+//        4.Timeliness Check -- Removing the data out of bounds
+
+        yellowTaxiDF=yellowTaxiDF.where ("lpep_pickup_datetime >= '2022-10-01'" +
+                "    AND lpep_dropoff_datetime < '2022-11-01'");
+
+//        ----If applied together -----
+
+        // Apply operations: filter, drop nulls, fill defaults, remove duplicates, filter by date
+        yellowTaxiDF = yellowTaxiDF
+                // Filter rows where passenger_count > 0
+                .where("passenger_count > 0")
+
+                // Filter rows where trip_distance > 0.0
+                .filter(col("trip_distance").gt(0.0))
+
+                // Drop rows where all values are null
+                .na().drop("all")
+
+                // Fill missing values using the default value map
+                .na().fill(defaultValuesMap)
+
+                // Drop duplicate rows
+                .dropDuplicates()
+
+                // Filter rows based on pickup and dropoff datetime
+                .where("lpep_pickup_datetime >= '2022-10-01' AND lpep_dropoff_datetime < '2022-11-01'");
+
+        // Show the result after all operations
+        yellowTaxiDF.show(false);
+
+        System.out.println("After Applying Timeliness Check :"+yellowTaxiDF.count());
+        try (final var scanner = new Scanner(System.in)) {
+            scanner.nextLine();
+        }
 
     }
 }
