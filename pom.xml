@@ -54,5 +54,12 @@
             <artifactId>hadoop-aws</artifactId>
             <version>${hadoop.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-avro_2.13</artifactId>
+            <version>${apache-spark.version}</version> <!-- Adjust based on your Spark version -->
+        </dependency>
+
+
     </dependencies>
 </project>

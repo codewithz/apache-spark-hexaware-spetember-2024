@@ -207,6 +207,38 @@ public class DataframesOps {
 
 //        https://shorturl.at/cEFcB
 
+//        Writing to a some location
+        String outputBasePath="C:\\Spark\\outputs\\";
+        yellowTaxiDF
+                .write()
+                .option("header","true")
+                .option("dateFormat","yyyy-MM-dd HH:mm:ss.S")
+                .mode("overwrite")  // Append,ErrorIfExists,Ignore,Overwrite
+                .csv(outputBasePath+"YellowTaxiOutput.csv");
+
+
+        yellowTaxiDF
+                .write()
+//                .option("header","true")
+                .option("dateFormat","yyyy-MM-dd HH:mm:ss.S")
+                .mode("overwrite")  // Append,ErrorIfExists,Ignore,Overwrite
+                .json(outputBasePath+"YellowTaxiOutput.json");
+
+        yellowTaxiDF
+                .write()
+//                .option("header","true")
+                .option("dateFormat","yyyy-MM-dd HH:mm:ss.S")
+                .mode("overwrite")  // Append,ErrorIfExists,Ignore,Overwrite
+                .parquet(outputBasePath+"YellowTaxiOutput.parquet");
+
+        yellowTaxiDF
+                .write()
+                .mode("overwrite")  // Append,ErrorIfExists,Ignore,Overwrite
+                .format("avro")
+                .save(outputBasePath+"YellowTaxiOutput.avro");
+
+
+
 
         try (final var scanner = new Scanner(System.in)) {
             scanner.nextLine();
