@@ -1,16 +1,20 @@
 package com.cwz;
 
+import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
-import static  org.apache.spark.sql.functions.col;
+
+import org.apache.spark.sql.functions.*;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+
+import static org.apache.spark.sql.functions.*;
 
 public class DataframesOps {
 
@@ -156,6 +160,37 @@ public class DataframesOps {
                 .withColumnRenamed("payment_type", "PaymentType");
 
         yellowTaxiDF.printSchema();
+
+//        Add column by name of TripYear
+
+        yellowTaxiDF=yellowTaxiDF.withColumn("TripYear",year(col("PickupTime")));
+
+        yellowTaxiDF=yellowTaxiDF.select(
+                col("*"),
+                month(col("PickupTime")).alias("TripMonth"),
+                dayofmonth(col("PickupTime")).alias("TripDay")
+        );
+
+//        yellowTaxiDF=yellowTaxiDF.withColumn("TripTimeInMinutes",
+//                round(
+//                        (unix_timestamp(col("DropTime"))
+//                                .minus(
+//                                        unix_timestamp(col("PickupTime")
+//                                )
+//                        ))
+//                                .divide(60),2
+//                ));
+
+        Column tripTimeInSecondsExpr=unix_timestamp(col("DropTime")).minus(unix_timestamp(col("PickupTime")));
+        Column tripTimeInMinutesExpr=round(tripTimeInSecondsExpr.divide(60),2);
+
+        yellowTaxiDF=yellowTaxiDF.withColumn("TripTimeInMinutes",tripTimeInMinutesExpr);
+        yellowTaxiDF.printSchema();
+
+        yellowTaxiDF.show(5);
+
+
+
 
         try (final var scanner = new Scanner(System.in)) {
             scanner.nextLine();
