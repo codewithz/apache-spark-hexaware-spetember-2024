@@ -160,7 +160,7 @@ public class CreateDataFrames {
         });
 
 
-//        System.out.println(yellowTaxiSchema.prettyJson());
+        System.out.println(taxiBasesSchema.prettyJson());
 
         Dataset<Row> taxiBasesDF=spark
                 .read()
@@ -173,6 +173,54 @@ public class CreateDataFrames {
         taxiBasesDF.printSchema();
         taxiBasesDF.show(false);
 
+
+        System.out.println("--------------- Way 4 - JSON- Nested Structure -----------------------------------");
+//        Load from Data file -- csv
+        String jsonEmpFilePath="C:\\Spark\\DataFiles\\employee.json";
+        StructType employeeSchema = DataTypes.createStructType(new StructField[]{
+
+                // Top-level fields
+                DataTypes.createStructField("EmployeeID", DataTypes.IntegerType, true),
+
+                // Nested field for Name (2nd level)
+                DataTypes.createStructField("Name", DataTypes.createStructType(new StructField[]{
+                        DataTypes.createStructField("First", DataTypes.StringType, true),
+                        DataTypes.createStructField("Last", DataTypes.StringType, true)
+                }), true),
+
+                // Nested field for ContactInfo (2nd level)
+                DataTypes.createStructField("ContactInfo", DataTypes.createStructType(new StructField[]{
+                        DataTypes.createStructField("Email", DataTypes.StringType, true),
+                        DataTypes.createStructField("Phone", DataTypes.StringType, true),
+
+                        // Nested field inside ContactInfo for Address (3rd level)
+                        DataTypes.createStructField("Address", DataTypes.createStructType(new StructField[]{
+                                DataTypes.createStructField("Street", DataTypes.StringType, true),
+                                DataTypes.createStructField("City", DataTypes.StringType, true),
+                                DataTypes.createStructField("State", DataTypes.StringType, true),
+                                DataTypes.createStructField("ZipCode", DataTypes.StringType, true),
+
+                                // Array of previous addresses (new field)
+                                DataTypes.createStructField("PreviousAddresses", DataTypes.createArrayType(DataTypes.StringType), true)
+                        }), true)
+                }), true),
+
+                // Additional top-level fields
+                DataTypes.createStructField("Department", DataTypes.StringType, true),
+                DataTypes.createStructField("Salary", DataTypes.DoubleType, true)
+        });
+
+        // Read the JSON file with the custom schema
+        Dataset<Row> employeeJsonDF = spark.read()
+                .option("multiline", "true")  // if the JSON is multi-line
+                .schema(employeeSchema)       // Apply the schema
+                .json(jsonEmpFilePath);  // Path to the JSON file
+
+        // Show the DataFrame
+        employeeJsonDF.show(false);  // Use "false" to avoid truncation
+
+        // Print the schema for verification
+        employeeJsonDF.printSchema();
 
 
 
