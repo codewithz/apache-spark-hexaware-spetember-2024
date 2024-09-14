@@ -30,6 +30,15 @@ public class HandlingCorruptData {
 //
 //                                .json(filePath);
 
-        rateCodeDF.show();
+        String csvFilePath="C:\\Spark\\new-data\\RateCodes.csv";
+
+        Dataset<Row> rateCodeCSVDF=spark
+                                .read()
+                .option("header","true")
+                                 .option("mode","PERMISSIVE")
+                                  .option("columnNameOfCorruptRecord","Records with Issues")  //it wors only for JSON
+                                .csv(csvFilePath);
+
+        rateCodeCSVDF.show();
     }
 }
