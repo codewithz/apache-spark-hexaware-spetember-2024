@@ -194,6 +194,16 @@ public class DataframesOps {
 
         yellowTaxiDF.show(5);
 
+        Dataset<Row> yellowTaxiDFReport=yellowTaxiDF
+                .groupBy("PickupLocationId","DropLocationId")
+                .agg(
+                        avg("TripTimeInMinutes").alias("AvgTripTime"),
+                        sum("TotalAmount").alias("SumAmount")
+                )
+                .orderBy(col("PickupLocationId").desc());
+
+        yellowTaxiDFReport.show();
+
 
 
 
