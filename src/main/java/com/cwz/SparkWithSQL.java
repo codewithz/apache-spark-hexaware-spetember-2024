@@ -139,6 +139,29 @@ public class SparkWithSQL {
 //|                       Brooklyn|  Yellow|     28089|
 
 
+        String solutionQuery="SELECT Borough, TaxiType, COUNT(*) AS TotalTrips\n" +
+                "\n" +
+                "FROM TaxiZones\n" +
+                "\n" +
+                "LEFT JOIN\n" +
+                "(\n" +
+                "\n" +
+                "    SELECT 'Yellow' AS TaxiType, PULocationID FROM YellowTaxis\n" +
+                "    \n" +
+                "    UNION ALL\n" +
+                "    \n" +
+                "    SELECT 'Green' AS TaxiType, PULocationID FROM GreenTaxis\n" +
+                "    \n" +
+                ") AllTaxis\n" +
+                "\n" +
+                "ON AllTaxis.PULocationID = TaxiZones.LocationID\n" +
+                "\n" +
+                "GROUP BY Borough, TaxiType\n" +
+                "\n" +
+                "ORDER BY Borough, TaxiType";
+
+        spark.sql(solutionQuery).show();
+
         try (final var scanner = new Scanner(System.in)) {
             scanner.nextLine();
         }
