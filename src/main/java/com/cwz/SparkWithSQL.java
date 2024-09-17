@@ -65,6 +65,45 @@ public class SparkWithSQL {
 
         outputDF.show();
 
+//        --------------------------------------------------------------------------------------
+
+        Dataset<Row> greenTaxiDF=spark
+                .read()
+                .option("header","true")
+                .option("inferSchema","true")
+                .option("delimiter","\t")
+                .csv("C:\\Spark\\new-data\\GreenTaxis_202210.csv");
+
+        greenTaxiDF.createOrReplaceTempView("GreenTaxis");
+
+        Dataset<Row> greenTaxiOutputDF=spark.sql("Select * from GreenTaxis");
+
+        greenTaxiOutputDF.show();
+
+        System.out.println("------------ Unioned Dataframe -------------");
+
+        String unionedTaxiQuery="SELECT 'Yellow'                   AS TaxiType\n" +
+                "\n" +
+                "      , lpep_pickup_datetime      AS PickupTime\n" +
+                "      , lpep_dropoff_datetime     AS DropTime\n" +
+                "      , PULocationID              AS PickupLocationId\n" +
+                "      , DOLocationID              AS DropLocationId      \n" +
+                "FROM YellowTaxis\n" +
+                "\n" +
+                "UNION ALL\n" +
+                "\n" +
+                "SELECT 'Green'                    AS TaxiType\n" +
+                "\n" +
+                "      , lpep_pickup_datetime      AS PickupTime\n" +
+                "      , lpep_dropoff_datetime     AS DropTime\n" +
+                "      , PULocationID              AS PickupLocationId\n" +
+                "      , DOLocationID              AS DropLocationId \n" +
+                "FROM GreenTaxis";
+
+        Dataset<Row> unionedTaxisDF=spark.sql(unionedTaxiQuery);
+
+        unionedTaxisDF.show(100);
+
         try (final var scanner = new Scanner(System.in)) {
             scanner.nextLine();
         }
