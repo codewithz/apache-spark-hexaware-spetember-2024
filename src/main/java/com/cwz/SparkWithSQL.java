@@ -104,6 +104,38 @@ public class SparkWithSQL {
 
         unionedTaxisDF.show(100);
 
+        System.out.println("------ Adding taxi Zones ----------------------");
+        StructType taxiZonesSchema = new StructType()
+                .add("LocationID", DataTypes.IntegerType, true)
+                .add("Borough", DataTypes.StringType, true)
+                .add("Zone", DataTypes.StringType, true)
+                .add("ServiceZone", DataTypes.StringType, true);
+
+        Dataset<Row> taxiZonesDF=spark
+                .read()
+                .option("header","true")
+                .option("inferSchema","true")
+                .schema(taxiZonesSchema)
+                .csv("C:\\Spark\\new-data\\TaxiZones.csv");
+
+
+        taxiZonesDF.createOrReplaceTempView("TaxiZones");
+
+        taxiZonesDF.count();
+
+        spark.sql("Select * from TaxiZones").show();
+
+//        Question -- Figure out number of rides, grouped by Borough and type of Taxi
+
+//        ------------+--------+----------+
+//                |      Borough|TaxiType|TotalTrips|
+//                +-------------+--------+----------+
+//                |      Bronx|   Green|      1852|
+//|                      Bronx|  Yellow|      4511|
+//|                    Brooklyn|   Green|     11113|
+//|                       Brooklyn|  Yellow|     28089|
+
+
         try (final var scanner = new Scanner(System.in)) {
             scanner.nextLine();
         }
