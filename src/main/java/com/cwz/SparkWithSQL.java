@@ -104,6 +104,8 @@ public class SparkWithSQL {
 
         unionedTaxisDF.show(100);
 
+        unionedTaxisDF.createOrReplaceTempView("GreenYellowTaxis");
+
         System.out.println("------ Adding taxi Zones ----------------------");
         StructType taxiZonesSchema = new StructType()
                 .add("LocationID", DataTypes.IntegerType, true)
@@ -125,6 +127,7 @@ public class SparkWithSQL {
 
         spark.sql("Select * from TaxiZones").show();
 
+//      New Data  -- https://tinyurl.com/yc5k4kn9
 //        Question -- Figure out number of rides, grouped by Borough and type of Taxi
 
 //        ------------+--------+----------+
