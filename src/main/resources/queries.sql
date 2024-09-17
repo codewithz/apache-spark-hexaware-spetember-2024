@@ -38,3 +38,12 @@ ON AllTaxis.PULocationID = TaxiZones.LocationID
 GROUP BY Borough, TaxiType
 
 ORDER BY Borough, TaxiType
+------------------------------------------------------------------------------
+
+    SELECT DISTINCT tz.*
+
+    FROM TaxiZones tz
+
+        LEFT JOIN YellowTaxis yt ON yt.PickupLocationId = tz.PickupLocationId
+
+        WHERE yt.PickupLocationId IS NULL

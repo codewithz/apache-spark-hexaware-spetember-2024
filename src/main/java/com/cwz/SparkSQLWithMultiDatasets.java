@@ -7,6 +7,8 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 
+import java.util.Scanner;
+
 public class SparkSQLWithMultiDatasets {
 
     public static void main(String[] args) {
@@ -78,6 +80,27 @@ public class SparkSQLWithMultiDatasets {
 
         joinedDF.printSchema();
         joinedDF.show();
+
+//        ---------------------------------------------------
+
+        yellowTaxiDF.createOrReplaceTempView("YellowTaxis");
+        taxiZonesDF.createOrReplaceTempView("TaxiZones");
+
+//        ---------------------------------------------------
+//        Question --> Find all LocationIds in TaxiZones, from where no pickups have happened
+
+        Dataset<Row> resultDF = spark.sql(
+                "SELECT DISTINCT tz.* " +
+                        "FROM TaxiZones tz " +
+                        "LEFT JOIN YellowTaxis yt ON yt.PULocationID = tz.LocationId " +
+                        "WHERE yt.PULocationID IS NULL"
+        );
+
+        resultDF.show();
+
+        try (final var scanner = new Scanner(System.in)) {
+            scanner.nextLine();
+        }
 
     }
 }
