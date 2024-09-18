@@ -7,6 +7,8 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
+import org.apache.spark.sql.functions;
+import static org.apache.spark.sql.functions.*;
 
 import java.util.Scanner;
 
@@ -88,5 +90,22 @@ public class SparkPerformancePartitions {
         }
 
 
+    }
+
+    // Method to get DataFrame statistics
+    public static Dataset<Row> getDataFrameStats(Dataset<Row> dataFrame, String columnName) {
+        return dataFrame
+                // Get partition number for each record
+                .withColumn("Partition Number", functions.spark_partition_id())
+
+                // Group by partition and calculate stats for the specified column
+                .groupBy("Partition Number")
+                .agg(
+                        count("*").alias("Record Count"),
+                        min(columnName).alias("Min Column Value"),
+                        max(columnName).alias("Max Column Value")
+                )
+                // Order the results by partition number
+                .orderBy("Partition Number");
     }
 }
