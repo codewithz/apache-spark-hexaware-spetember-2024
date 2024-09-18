@@ -7,6 +7,8 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 
+import java.util.Scanner;
+
 public class SparkSQLWindowFunctions {
 
     public static void main(String[] args) {
@@ -124,6 +126,10 @@ public class SparkSQLWindowFunctions {
 //        2. Create a Window over entire table partitioned by Borough
 //        3. Add Total RIdes (across all zones in a borough)
 //        4. Calculate Pct
+
+        try (final var scanner = new Scanner(System.in)) {
+            scanner.nextLine();
+        }
 
     }
 }
