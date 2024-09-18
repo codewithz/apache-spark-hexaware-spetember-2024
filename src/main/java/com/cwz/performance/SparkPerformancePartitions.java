@@ -121,7 +121,14 @@ public class SparkPerformancePartitions {
 
         Dataset<Row> repartitionedDF=yellowTaxiDF.repartitionByRange(14,col("PULocationID"));
 
+        repartitionedDF=repartitionedDF.withColumn("PID",spark_partition_id());
+
+        repartitionedDF.createOrReplaceTempView("repartitioned");
+
+        spark.sql("Select * from repartitioned where PID=2").show();
+
         System.out.println("Partitions for repartitioned Data:"+repartitionedDF.rdd().getNumPartitions());
+
 
         getDataFrameStats(repartitionedDF,"PULocationID").show();
 
