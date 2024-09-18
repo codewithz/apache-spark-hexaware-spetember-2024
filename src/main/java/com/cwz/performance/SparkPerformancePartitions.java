@@ -73,7 +73,7 @@ public class SparkPerformancePartitions {
         System.out.println(yellowTaxiSchema.prettyJson());
 
 
-        spark.conf().set("spark.sql.files.maxPartitionBytes","64m");
+//        spark.conf().set("spark.sql.files.maxPartitionBytes","64m");
 
         Dataset<Row> yellowTaxiDF=spark
                 .read()
@@ -83,9 +83,14 @@ public class SparkPerformancePartitions {
 
         System.out.println("Partitions :"+yellowTaxiDF.rdd().getNumPartitions());
 
-        System.out.println("Record Counts : "+yellowTaxiDF.count());
+//        System.out.println("Record Counts : "+yellowTaxiDF.count());
+        long count=yellowTaxiDF.count();
 
-        spark.conf().set("spark.sql.shuffle.partitions","3");
+//        if(count >2000000){
+//            spark.conf().set("something","something");
+//        }
+
+        spark.conf().set("spark.sql.shuffle.partitions",3);
         Dataset<Row> yellowTaxiGroupedDF = yellowTaxiDF
                 .groupBy("PULocationID")
                 .agg(sum("total_amount").alias("TotalAmount"));
@@ -95,6 +100,31 @@ public class SparkPerformancePartitions {
         System.out.println("Record Counts grouped data : "+yellowTaxiGroupedDF.count());
         getDataFrameStats(yellowTaxiGroupedDF,"PULocationID").show();
         getDataFrameStats(yellowTaxiDF,"PULocationID").show();
+
+//        Implementing Repartitioning -- Round Robin
+
+//        Dataset<Row> repartitionedDF=yellowTaxiDF.repartition(14);
+//
+//        System.out.println("Partitions for repartitioned Data:"+repartitionedDF.rdd().getNumPartitions());
+//
+//        getDataFrameStats(repartitionedDF,"PULocationID").show();
+
+        //        Implementing Repartitioning -- Hash Repartitioning
+
+//        Dataset<Row> repartitionedDF=yellowTaxiDF.repartition(14,col("PULocationID"));
+//
+//        System.out.println("Partitions for repartitioned Data:"+repartitionedDF.rdd().getNumPartitions());
+//
+//        getDataFrameStats(repartitionedDF,"PULocationID").show();
+
+        //        Implementing Repartitioning -- Range Partitioning
+
+        Dataset<Row> repartitionedDF=yellowTaxiDF.repartitionByRange(14,col("PULocationID"));
+
+        System.out.println("Partitions for repartitioned Data:"+repartitionedDF.rdd().getNumPartitions());
+
+        getDataFrameStats(repartitionedDF,"PULocationID").show();
+
 
         try (final var scanner = new Scanner(System.in)) {
             scanner.nextLine();
