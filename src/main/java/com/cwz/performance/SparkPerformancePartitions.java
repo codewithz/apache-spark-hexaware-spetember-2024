@@ -85,6 +85,17 @@ public class SparkPerformancePartitions {
 
         System.out.println("Record Counts : "+yellowTaxiDF.count());
 
+        spark.conf().set("spark.sql.shuffle.partitions","3");
+        Dataset<Row> yellowTaxiGroupedDF = yellowTaxiDF
+                .groupBy("PULocationID")
+                .agg(sum("total_amount").alias("TotalAmount"));
+
+        System.out.println("Partitions for grouped data:"+yellowTaxiGroupedDF.rdd().getNumPartitions());
+
+        System.out.println("Record Counts grouped data : "+yellowTaxiGroupedDF.count());
+        getDataFrameStats(yellowTaxiGroupedDF,"PULocationID").show();
+        getDataFrameStats(yellowTaxiDF,"PULocationID").show();
+
         try (final var scanner = new Scanner(System.in)) {
             scanner.nextLine();
         }
