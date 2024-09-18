@@ -79,7 +79,7 @@ public class SparkSQLWithMultiDatasets {
                                 ); //jointypes  -->left,leftouter,right,rightouter,full
 
         joinedDF.printSchema();
-        joinedDF.show();
+//        joinedDF.show();
 
 //        ---------------------------------------------------
 
@@ -97,6 +97,55 @@ public class SparkSQLWithMultiDatasets {
         );
 
         resultDF.show();
+
+//        Set Operations -- UNION, UNION ALL, INTERSECT, EXCEPT
+
+
+        String cabsFilePath="C:\\Spark\\DataFiles\\Cabs.csv";
+
+        Dataset<Row> cabsDF=spark
+                .read()
+                .option("header","true")
+                .option("inferSchema","true")
+                .csv(cabsFilePath);
+
+        cabsDF.createOrReplaceTempView("Cabs");
+
+        String driversFilePath="C:\\Spark\\DataFiles\\Drivers.csv";
+
+        Dataset<Row> driversDF=spark
+                .read()
+                .option("header","true")
+                .option("inferSchema","true")
+                .csv(driversFilePath);
+
+
+        driversDF.createOrReplaceTempView("Drivers");
+
+        driversDF.show(100);
+
+//        Count of all the drivers
+
+        String exceptQuery="  (\n" +
+                "        SELECT Name \n" +
+                "        FROM Cabs\n" +
+                "        WHERE LicenseType = 'OWNER MUST DRIVE'\n" +
+                "    )\n" +
+                "\n" +
+                "    EXCEPT\n" +
+                "\n" +
+                "    (\n" +
+                "        SELECT Name\n" +
+                "        FROM Drivers\n" +
+                "    )";
+
+        Dataset<Row> unregisteredDrivers=spark.sql(exceptQuery);
+
+        unregisteredDrivers.show(false);
+        long count=unregisteredDrivers.count();
+        System.out.println("Total Count:"+count);
+
+
 
         try (final var scanner = new Scanner(System.in)) {
             scanner.nextLine();

@@ -47,3 +47,66 @@ ORDER BY Borough, TaxiType
         LEFT JOIN YellowTaxis yt ON yt.PickupLocationId = tz.PickupLocationId
 
         WHERE yt.PickupLocationId IS NULL
+
+
+--        --------- List of all the drivers ----------
+
+    (
+        SELECT Name
+        FROM Cabs
+        WHERE LicenseType = 'OWNER MUST DRIVE'
+    )
+
+    UNION ALL
+
+    (
+        SELECT Name
+        FROM Drivers
+    )
+
+
+--    ----------List of Unique Drivers --------------
+
+    (
+        SELECT Name
+        FROM Cabs
+        WHERE LicenseType = 'OWNER MUST DRIVE'
+    )
+
+    UNION
+
+    (
+        SELECT Name
+        FROM Drivers
+    )
+
+--    ------ Create a List of Drivers who are driving the cabs
+
+    (
+        SELECT Name
+        FROM Cabs
+        WHERE LicenseType = 'OWNER MUST DRIVE'
+    )
+
+    INTERSECT
+
+    (
+        SELECT Name
+        FROM Drivers
+    )
+
+
+--    ---List of Drivers who are driving the cab but not registered
+
+  (
+        SELECT Name
+        FROM Cabs
+        WHERE LicenseType = 'OWNER MUST DRIVE'
+    )
+
+    EXCEPT
+
+    (
+        SELECT Name
+        FROM Drivers
+    )
