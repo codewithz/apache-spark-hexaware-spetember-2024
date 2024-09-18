@@ -7,13 +7,11 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 
-import java.util.Scanner;
-
-public class SparkSQLWithMultiDatasets {
+public class SparkSQLWindowFunctions {
 
     public static void main(String[] args) {
         SparkSession spark=SparkSession.builder()
-                .appName("Spark With SQL -Multi Dataset Operations ")
+                .appName("Spark With SQL Window Functions ")
                 .master("local[4]")
                 .getOrCreate();
 
@@ -49,10 +47,10 @@ public class SparkSQLWithMultiDatasets {
         Dataset<Row> yellowTaxiDF=spark
                 .read()
                 .option("header","true")
-//                                        .option("inferSchema","true")
                 .schema(yellowTaxiSchema)
-//                .option("mode","FAILFAST") //DROPMALFORMED |FAILFAST |PERMISSIVE
                 .csv(filePath);
+
+        yellowTaxiDF.createOrReplaceTempView("YellowTaxis");
 
 
 
@@ -70,86 +68,62 @@ public class SparkSQLWithMultiDatasets {
                 .schema(taxiZonesSchema)
                 .csv("C:\\Spark\\new-data\\TaxiZones.csv");
 
-
-        Dataset<Row> joinedDF=yellowTaxiDF
-                                .join(
-                                        taxiZonesDF,
-                                        yellowTaxiDF.col("PULocationID").equalTo(taxiZonesDF.col("LocationID")),
-                                        "inner"
-                                ); //jointypes  -->left,leftouter,right,rightouter,full
-
-        joinedDF.printSchema();
-//        joinedDF.show();
-
-//        ---------------------------------------------------
-
-        yellowTaxiDF.createOrReplaceTempView("YellowTaxis");
         taxiZonesDF.createOrReplaceTempView("TaxiZones");
 
-//        ---------------------------------------------------
-//        Question --> Find all LocationIds in TaxiZones, from where no pickups have happened
 
-        Dataset<Row> resultDF = spark.sql(
-                "SELECT DISTINCT tz.* " +
-                        "FROM TaxiZones tz " +
-                        "LEFT JOIN YellowTaxis yt ON yt.PULocationID = tz.LocationId " +
-                        "WHERE yt.PULocationID IS NULL"
-        );
+//        Find share of each borough in terms of rides
 
-        resultDF.show();
-
-//        Set Operations -- UNION, UNION ALL, INTERSECT, EXCEPT
-
-
-        String cabsFilePath="C:\\Spark\\DataFiles\\Cabs.csv";
-
-        Dataset<Row> cabsDF=spark
-                .read()
-                .option("header","true")
-                .option("inferSchema","true")
-                .csv(cabsFilePath);
-
-        cabsDF.createOrReplaceTempView("Cabs");
-
-        String driversFilePath="C:\\Spark\\DataFiles\\Drivers.csv";
-
-        Dataset<Row> driversDF=spark
-                .read()
-                .option("header","true")
-                .option("inferSchema","true")
-                .csv(driversFilePath);
-
-
-        driversDF.createOrReplaceTempView("Drivers");
-
-        driversDF.show(100);
-
-//        Count of all the drivers
-
-        String exceptQuery="  (\n" +
-                "        SELECT Name \n" +
-                "        FROM Cabs\n" +
-                "        WHERE LicenseType = 'OWNER MUST DRIVE'\n" +
-                "    )\n" +
+        String taxiRidesQuery="\n" +
+                "            SELECT tz.Borough\n" +
+                "                     , COUNT(*)     AS RideCount\n" +
                 "\n" +
-                "    EXCEPT\n" +
+                "                FROM TaxiZones tz\n" +
+                "                    INNER JOIN YellowTaxis yt ON yt.PULocationID = tz.LocationId\n" +
                 "\n" +
-                "    (\n" +
-                "        SELECT Name\n" +
-                "        FROM Drivers\n" +
-                "    )";
+                "                GROUP BY tz.Borough";
 
-        Dataset<Row> unregisteredDrivers=spark.sql(exceptQuery);
+        Dataset<Row> taxiRidesDF=spark.sql(taxiRidesQuery);
 
-        unregisteredDrivers.show(false);
-        long count=unregisteredDrivers.count();
-        System.out.println("Total Count:"+count);
+        taxiRidesDF.show();
+
+        taxiRidesDF.createOrReplaceTempView("TaxiRides");
+
+//        Calculate Total Rides across all boroughs
+
+//        1. Create a Window over entire table
+//        2. Add TOtal Rides (across all boroughs) against each row
+
+        String totalRidesQuery="  SELECT *\n" +
+                "                         , SUM (RideCount)   OVER ()   AS TotalRideCount\n" +
+                "\n" +
+                "                    FROM TaxiRides";
+
+        Dataset<Row> taxiRidesWindowDF=spark.sql(totalRidesQuery);
+
+        taxiRidesWindowDF.orderBy("Borough").show();
+        taxiRidesWindowDF.createOrReplaceTempView("TaxiRidesWindow");
+
+//        Find the share of each borough in terms of rides
+
+        String taxiRidesShareQuery="\n" +
+                "                SELECT *\n" +
+                "                  , ROUND( (RideCount * 100) / TotalRideCount, 2)   AS RidesSharePercent\n" +
+                "\n" +
+                "            FROM TaxiRidesWindow\n" +
+                "            ORDER BY Borough";
 
 
+        spark.sql(taxiRidesShareQuery).show();
 
-        try (final var scanner = new Scanner(System.in)) {
-            scanner.nextLine();
-        }
+
+//        Find the share of each zone in terms of rides within their Borough
+
+//        Zone is a part of Borough
+
+//        1. Get rides for each zone
+//        2. Create a Window over entire table partitioned by Borough
+//        3. Add Total RIdes (across all zones in a borough)
+//        4. Calculate Pct
 
     }
 }
