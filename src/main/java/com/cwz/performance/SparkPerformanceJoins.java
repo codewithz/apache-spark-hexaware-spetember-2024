@@ -91,6 +91,16 @@ public class SparkPerformanceJoins {
 
         joinedDF.show();
 
+        yellowTaxiDF.createOrReplaceTempView("YellowTaxi1");
+        yellowTaxiDF.createOrReplaceTempView("YellowTaxi2");
+
+        spark.sql("" +
+                "Select * from " +
+                "YellowTaxi1 yt1 " +
+                "JOIN YellowTaxi2 yt2 " +
+                "ON yt1.PULocationID = yt2.DOLocationID").show();
+
+
 
 
         try (final var scanner = new Scanner(System.in)) {
