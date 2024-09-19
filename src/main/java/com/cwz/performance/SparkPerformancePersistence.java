@@ -3,12 +3,15 @@ package com.cwz.performance;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 
-public class SparkPerformancePersisiting {
+import static  org.apache.spark.sql.functions.sum;
+
+public class SparkPerformancePersistence {
 
     public static void main(String[] args) {
         SparkSession spark=SparkSession.builder()
@@ -51,6 +54,18 @@ public class SparkPerformancePersisiting {
                 .option("header","true")
                 .schema(yellowTaxiSchema)
                 .csv(filePath);
+
+        Dataset<Row> yellowTaxiGroupedDF=yellowTaxiDF
+                                            .dropDuplicates()
+                                            .groupBy("PULocationID")
+                .agg(sum("total_amount").alias("Total Amount"));
+
+
+        yellowTaxiGroupedDF.write()
+                .option("header","true")
+                .option("dateFormat","yyyy-MM-dd HH:mm:ss.S")
+                .mode(SaveMode.Overwrite)
+                .csv("C:\\Spark\\outputs\\CacheTest_Enabled_FirstTime.csv");
 
     }
 }
