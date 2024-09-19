@@ -81,7 +81,7 @@ public class SparkPerformanceJoins {
 
         System.out.println("Broadcast Join Threshold is "+broadcastThreshold);
 
-        spark.conf().set("spark.sql.autoBroadcastJoinThreshold","-1"); // Disabling bradcast join
+//        spark.conf().set("spark.sql.autoBroadcastJoinThreshold","-1"); // Disabling broadcast join
 
         Dataset<Row> joinedDF=yellowTaxiDF.join(
                 taxiZonesDF,
