@@ -18,12 +18,37 @@ public class SparkPerformanceDynamicAllocation {
         SparkSession spark = SparkSession.builder()
                 .appName("ResourceAllocationApp")
                 .master("spark://localhost:7077")
-                .config("spark.dynamicAllocation.enabled", "false")
+//                .config("spark.dynamicAllocation.enabled", "false")
 
-                // Define configuration for application
-                .config("spark.cores.max", "4")  // Maximum cores across the cluster
-                .config("spark.executor.memory", "2g")  // Executor memory size
-                .config("spark.executor.cores", "2")  // Number of cores per executor
+//                // Define configuration for application
+//                .config("spark.cores.max", "4")  // Maximum cores across the cluster
+//                .config("spark.executor.memory", "2g")  // Executor memory size
+//                .config("spark.executor.cores", "2")  // Number of cores per executor
+
+//                # Enable dynamic allocation
+                .config("spark.dynamicAllocation.enabled",                 "true")
+                .config("spark.dynamicAllocation.shuffleTracking.enabled", "true")
+
+
+//                # Define configuration for application
+                .config("spark.executor.memory",    "2g")
+                .config("spark.executor.cores",     "2")
+
+                .config("spark.executor.instances", "2")
+
+//                # Define minimum and maximum executors
+                .config("spark.dynamicAllocation.minExecutors", "0")
+                .config("spark.dynamicAllocation.maxExecutors", "5")
+
+//                # Set scheduler backlog timeout
+                .config("spark.dynamicAllocation.schedulerBacklogTimeout",   "1s")
+
+//                # Set executor idle timeout
+                .config("spark.dynamicAllocation.executorIdleTimeout",       "10s")
+
+//                # Set cached idle timeout
+                .config("spark.dynamicAllocation.cachedExecutorIdleTimeout", "10s")
+
 
                 .getOrCreate();
 
