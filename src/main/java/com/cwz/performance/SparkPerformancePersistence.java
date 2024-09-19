@@ -8,6 +8,9 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
+import org.apache.spark.storage.StorageLevel;
+
+import java.util.Scanner;
 
 import static  org.apache.spark.sql.functions.sum;
 
@@ -18,6 +21,8 @@ public class SparkPerformancePersistence {
                 .appName("Spark Performance - Persistence ")
                 .master("local[4]")
                 .getOrCreate();
+
+        spark.conf().set("spark.sql.shuffle.partitions",3);
 
         JavaSparkContext context=new JavaSparkContext(spark.sparkContext());
 
@@ -60,12 +65,43 @@ public class SparkPerformancePersistence {
                                             .groupBy("PULocationID")
                 .agg(sum("total_amount").alias("Total Amount"));
 
+//
+//        yellowTaxiGroupedDF.write()
+//                .option("header","true")
+//                .option("dateFormat","yyyy-MM-dd HH:mm:ss.S")
+//                .mode(SaveMode.Overwrite)
+//                .csv("C:\\Spark\\outputs\\CacheTest_Enabled_FirstTime.csv");
 
+//        This is where this will not be persisted -- LAZY OPERATION
+
+        yellowTaxiGroupedDF.persist(StorageLevel.MEMORY_AND_DISK());
+//
+//        Write the persisted DF to CSV for first time -- this where the caching will happen
         yellowTaxiGroupedDF.write()
                 .option("header","true")
                 .option("dateFormat","yyyy-MM-dd HH:mm:ss.S")
                 .mode(SaveMode.Overwrite)
-                .csv("C:\\Spark\\outputs\\CacheTest_Enabled_FirstTime.csv");
+                .csv("C:\\Spark\\outputs\\CacheTest_Enabled_And_Cached_FirstTime.csv");
+
+
+//        Write the Cached  DF to CSV for second time  -- this where the caching will happen
+        yellowTaxiGroupedDF.write()
+                .option("header","true")
+                .option("dateFormat","yyyy-MM-dd HH:mm:ss.S")
+                .mode(SaveMode.Overwrite)
+                .csv("C:\\Spark\\outputs\\CacheTest_Enabled_And_Cached_SecondTime.csv");
+
+
+        yellowTaxiGroupedDF.unpersist();
+
+
+
+
+
+
+        try (final var scanner = new Scanner(System.in)) {
+            scanner.nextLine();
+        }
 
     }
 }
