@@ -37,6 +37,16 @@
             <version>${apache-spark.version}</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/io.delta/delta-spark -->
+        <dependency>
+            <groupId>io.delta</groupId>
+            <artifactId>delta-spark_2.13</artifactId>
+            <version>3.2.0</version>
+        </dependency>
+
+
+
+
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-hdfs</artifactId>
