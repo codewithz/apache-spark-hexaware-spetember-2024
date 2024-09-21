@@ -20,7 +20,7 @@ public class SparkAQEDynamicCoalescing {
                 .appName("Spark AQE - Dynamic Coalescing ")
                 .master("local[4]")
                 .config("spark.dynamicAllocation.enabled","false")
-                .config("spark.sql.adaptive.enabled","true")
+                .config("spark.sql.adaptive.enabled","false")
                 .getOrCreate();
 
 
@@ -62,6 +62,38 @@ public class SparkAQEDynamicCoalescing {
                 .csv(filePath);
 
         System.out.println("Partitions :"+yellowTaxiDF.rdd().getNumPartitions());
+
+        spark.conf().set("spark.sql.shuffle.partitions", 20);
+
+        Dataset<Row> yellowTaxiGroupedDF = yellowTaxiDF
+                .groupBy("VendorId", "payment_type")
+                .agg(sum("total_amount"));
+
+        yellowTaxiGroupedDF.show();
+
+        // Print the number of partitions before enabling AQE
+        System.out.println("Partitions before AQE = " + yellowTaxiGroupedDF.rdd().getNumPartitions());
+
+        // Get partition stats before enabling AQE
+        getDataFrameStats(yellowTaxiGroupedDF, "VendorId").show();
+
+
+        // Enable AQE and coalescing
+        spark.conf().set("spark.sql.adaptive.enabled", "true");
+        spark.conf().set("spark.sql.adaptive.coalescePartitions.enabled", "true");
+
+
+     yellowTaxiGroupedDF = yellowTaxiDF
+                .groupBy("VendorId", "payment_type")
+                .agg(sum("total_amount"));
+
+        yellowTaxiGroupedDF.show();
+
+        // Print the number of partitions after enabling AQE
+        System.out.println("Partitions after AQE = " + yellowTaxiGroupedDF.rdd().getNumPartitions());
+
+        // Get partition stats before enabling AQE
+        getDataFrameStats(yellowTaxiGroupedDF, "VendorId").show();
 
 
         try (final var scanner = new Scanner(System.in)) {
