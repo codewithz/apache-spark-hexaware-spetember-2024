@@ -88,42 +88,42 @@ public class DeltaLakeApplication {
 
         spark.sql("DROP TABLE TaxisDB.YellowTaxis");
 
-        String deltaFileLocation=outputDir+"YellowTaxis.delta\\";
-        String ddlQuery="CREATE TABLE TaxisDB.YellowTaxis\n" +
-                "(\n" +
-                "    VendorId                INT               COMMENT 'Vendor providing the ride',\n" +
-                "    \n" +
-                "    PickupTime              TIMESTAMP,\n" +
-                "    DropTime                TIMESTAMP,\n" +
-                "    \n" +
-                "    PickupLocationId        INT               NOT NULL,\n" +
-                "    DropLocationId          INT,\n" +
-                "    \n" +
-                "    PassengerCount          DOUBLE,\n" +
-                "    TripDistance            DOUBLE,\n" +
-                "    \n" +
-                "    RateCodeId              DOUBLE,\n" +
-                "    StoreAndFwdFlag         STRING,\n" +
-                "    PaymentType             INT,\n" +
-                "    \n" +
-                "    FareAmount              DOUBLE,\n" +
-                "    Extra                   DOUBLE,\n" +
-                "    MtaTax                  DOUBLE,\n" +
-                "    TipAmount               DOUBLE,\n" +
-                "    TollsAmount             DOUBLE,\n" +
-                "    ImprovementSurcharge    DOUBLE,\n" +
-                "    TotalAmount             DOUBLE,\n" +
-                "    CongestionSurcharge     DOUBLE,\n" +
-                "    AirportFee              DOUBLE\n" +
-                ")\n" +
+        String deltaFileLocation=outputDir+"YellowTaxis.delta";
+        String ddlQuery=" CREATE TABLE TaxisDB.YellowTaxis\n" +
+                "    (\n" +
+                "        VendorId                INT               COMMENT 'Vendor providing the ride',\n" +
                 "\n" +
-                "USING DELTA                  -- default is Parquet\n" +
+                "        PickupTime              TIMESTAMP,\n" +
+                "        DropTime                TIMESTAMP,\n" +
                 "\n" +
-                "LOCATION "+deltaFileLocation+"\n" +
+                "        PickupLocationId        INT               NOT NULL,\n" +
+                "        DropLocationId          INT,\n" +
                 "\n" +
-                "PARTITIONED BY (VendorId)    -- optional\n" +
+                "        PassengerCount          DOUBLE,\n" +
+                "        TripDistance            DOUBLE,\n" +
                 "\n" +
-                "COMMENT 'This table stores ride information for Yellow Taxis'";
+                "        RateCodeId              DOUBLE,\n" +
+                "        StoreAndFwdFlag         STRING,\n" +
+                "        PaymentType             INT,\n" +
+                "\n" +
+                "        FareAmount              DOUBLE,\n" +
+                "        Extra                   DOUBLE,\n" +
+                "        MtaTax                  DOUBLE,\n" +
+                "        TipAmount               DOUBLE,\n" +
+                "        TollsAmount             DOUBLE,\n" +
+                "        ImprovementSurcharge    DOUBLE,\n" +
+                "        TotalAmount             DOUBLE,\n" +
+                "        CongestionSurcharge     DOUBLE,\n" +
+                "        AirportFee              DOUBLE\n" +
+                "    )\n" +
+                "\n" +
+                "    USING DELTA                  -- default is Parquet\n" +
+                "\n" +
+                "    LOCATION \"C:/Spark/outputs/deltas/YellowTaxis.delta/\"\n" +
+                "\n" +
+                "    PARTITIONED BY (VendorId)    -- optional\n" +
+                "\n" +
+                "    COMMENT 'This table stores ride information for Yellow Taxis''";
 
 
         spark.sql(ddlQuery);

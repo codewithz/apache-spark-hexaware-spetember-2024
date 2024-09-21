@@ -293,3 +293,84 @@ ORDER BY Borough, TaxiType
     PARTITIONED BY (VendorId)    -- optional
 
     COMMENT 'This table stores ride information for Yellow Taxis'
+
+--    -- INSERT QUERY
+
+INSERT INTO TaxisDB.YellowTaxis
+
+-- (VendorId, PickupTime, DropTime, PickupLocationId, DropLocationId, PassengerCount, TripDistance, RateCodeId, StoreAndFwdFlag, PaymentType, FareAmount, Extra, MtaTax, TipAmount, TollsAmount, ImprovementSurcharge, TotalAmount, CongestionSurcharge, AirportFee)
+
+VALUES (3, '2022-12-01T00:00:00.000Z', '2022-12-01T00:15:34.000Z', 170, 140, 1.0, 2.9, 1.0, '1', 1, 13.0, 0.5, 0.5, 1.0, 0.0, 0.3, 15.3, 0.0, 0.0)
+
+
+-- Chgeck files holding the data
+
+SELECT INPUT_FILE_NAME()
+
+     , VendorId
+     , PickupLocationId
+     , PassengerCount
+
+FROM TaxisDB.YellowTaxis
+
+WHERE VendorId = 3
+
+-- UPDATE
+
+UPDATE TaxisDB.YellowTaxis
+
+SET PassengerCount = 2
+
+WHERE VendorId = 3
+    AND PickupLocationId = 249
+
+
+--    DELETE
+
+DELETE FROM TaxisDB.YellowTaxis
+
+WHERE VendorId = 3
+    AND PickupLocationId = 151
+
+----    yellowTaxiChangesDF = (
+--                                spark
+--                                  .read
+--                                  .option("header", "true")
+--                                  .schema(yellowTaxiSchema)
+--                                  .csv("C:\SparkCourse\DataFiles\Raw\YellowTaxis_changes.csv")
+--                            )
+--
+--      yellowTaxiChangesDF.show()
+
+--yellowTaxiChangesDF.createOrReplaceTempView("YellowTaxiChanges")
+
+
+--MERGE
+
+MERGE INTO TaxisDB.YellowTaxis tgt
+
+    USING YellowTaxiChanges    src
+
+        ON    tgt.VendorId          =  src.VendorId
+          AND tgt.PickupLocationId  =  src.PickupLocationId
+
+-- Update row if join conditions match
+WHEN MATCHED
+
+      THEN
+          UPDATE SET    tgt.PaymentType = src.PaymentType
+
+                                                      -- Use 'UPDATE SET *' to update all columns
+
+-- Insert row if row is not present in target table
+WHEN NOT MATCHED
+      AND PickupTime >= '2022-03-01'
+
+      THEN
+          INSERT (VendorId, PickupTime, DropTime, PickupLocationId, DropLocationId, PassengerCount, TripDistance,
+                  RateCodeId, StoreAndFwdFlag, PaymentType, FareAmount, Extra, MtaTax, TipAmount, TollsAmount,
+                  ImprovementSurcharge, TotalAmount, CongestionSurcharge, AirportFee)
+
+          VALUES (VendorId, PickupTime, DropTime, PickupLocationId, DropLocationId, PassengerCount, TripDistance,
+                  RateCodeId, StoreAndFwdFlag, PaymentType, FareAmount, Extra, MtaTax, TipAmount, TollsAmount,
+                  ImprovementSurcharge, TotalAmount, CongestionSurcharge, AirportFee)
