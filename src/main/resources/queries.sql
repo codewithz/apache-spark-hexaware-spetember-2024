@@ -255,3 +255,41 @@ ORDER BY Borough, TaxiType
     |Bronx  |Longwood                        |41       |4511                   |0.91                      |
     |Bronx  |Melrose South                   |173      |4511                   |3.84                      |
     +-------+--------------------------------+---------+-----------------------+------------------------
+
+
+
+    CREATE TABLE TaxisDB.YellowTaxis
+    (
+        VendorId                INT               COMMENT 'Vendor providing the ride',
+
+        PickupTime              TIMESTAMP,
+        DropTime                TIMESTAMP,
+
+        PickupLocationId        INT               NOT NULL,
+        DropLocationId          INT,
+
+        PassengerCount          DOUBLE,
+        TripDistance            DOUBLE,
+
+        RateCodeId              DOUBLE,
+        StoreAndFwdFlag         STRING,
+        PaymentType             INT,
+
+        FareAmount              DOUBLE,
+        Extra                   DOUBLE,
+        MtaTax                  DOUBLE,
+        TipAmount               DOUBLE,
+        TollsAmount             DOUBLE,
+        ImprovementSurcharge    DOUBLE,
+        TotalAmount             DOUBLE,
+        CongestionSurcharge     DOUBLE,
+        AirportFee              DOUBLE
+    )
+
+    USING DELTA                  -- default is Parquet
+
+    LOCATION "C:/SparkCourse/DataFiles/Output/YellowTaxis.delta/"
+
+    PARTITIONED BY (VendorId)    -- optional
+
+    COMMENT 'This table stores ride information for Yellow Taxis'

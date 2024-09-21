@@ -9,6 +9,8 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 
+import java.util.Scanner;
+
 public class DeltaLakeApplication {
 
     public static void main(String[] args) {
@@ -76,6 +78,61 @@ public class DeltaLakeApplication {
                 .format("delta")
                 .option("path",outputDir+"YellowTaxis.delta")
                 .saveAsTable("TaxisDB.YellowTaxis");
+
+
+        spark.sql("Select Count(*) from TaxisDB.YellowTaxis").show();
+
+
+        spark.sql("DESCRIBE HISTORY TaxisDB.YellowTaxis").show();
+
+
+        spark.sql("DROP TABLE TaxisDB.YellowTaxis");
+
+        String deltaFileLocation=outputDir+"YellowTaxis.delta\\";
+        String ddlQuery="CREATE TABLE TaxisDB.YellowTaxis\n" +
+                "(\n" +
+                "    VendorId                INT               COMMENT 'Vendor providing the ride',\n" +
+                "    \n" +
+                "    PickupTime              TIMESTAMP,\n" +
+                "    DropTime                TIMESTAMP,\n" +
+                "    \n" +
+                "    PickupLocationId        INT               NOT NULL,\n" +
+                "    DropLocationId          INT,\n" +
+                "    \n" +
+                "    PassengerCount          DOUBLE,\n" +
+                "    TripDistance            DOUBLE,\n" +
+                "    \n" +
+                "    RateCodeId              DOUBLE,\n" +
+                "    StoreAndFwdFlag         STRING,\n" +
+                "    PaymentType             INT,\n" +
+                "    \n" +
+                "    FareAmount              DOUBLE,\n" +
+                "    Extra                   DOUBLE,\n" +
+                "    MtaTax                  DOUBLE,\n" +
+                "    TipAmount               DOUBLE,\n" +
+                "    TollsAmount             DOUBLE,\n" +
+                "    ImprovementSurcharge    DOUBLE,\n" +
+                "    TotalAmount             DOUBLE,\n" +
+                "    CongestionSurcharge     DOUBLE,\n" +
+                "    AirportFee              DOUBLE\n" +
+                ")\n" +
+                "\n" +
+                "USING DELTA                  -- default is Parquet\n" +
+                "\n" +
+                "LOCATION "+deltaFileLocation+"\n" +
+                "\n" +
+                "PARTITIONED BY (VendorId)    -- optional\n" +
+                "\n" +
+                "COMMENT 'This table stores ride information for Yellow Taxis'";
+
+
+        spark.sql(ddlQuery);
+
+
+
+        try (final var scanner = new Scanner(System.in)) {
+            scanner.nextLine();
+        }
 
     }
 }
