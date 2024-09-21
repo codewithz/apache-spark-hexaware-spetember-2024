@@ -123,7 +123,7 @@ public class DeltaLakeApplication {
                 "\n" +
                 "    PARTITIONED BY (VendorId)    -- optional\n" +
                 "\n" +
-                "    COMMENT 'This table stores ride information for Yellow Taxis''";
+                "    COMMENT 'This table stores ride information for Yellow Taxis'";
 
 
         spark.sql(ddlQuery);
